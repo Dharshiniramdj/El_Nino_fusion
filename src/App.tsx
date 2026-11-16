@@ -445,144 +445,164 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* TWO-COLUMN GENERAL GRID WRAPPER */}
-                <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch">
+                {/* SINGLE-COLUMN FULL-WIDTH DASHBOARD STACK */}
+                <div className="flex flex-col gap-6">
                   
-                  {/* LEFT: Climate Map Center: 8 cols */}
-                  <div className="xl:col-span-8 flex flex-col gap-6">
-                    <ClimateMap 
-                      regions={filteredRegions}
-                      activeRegion={activeRegion}
-                      onSelectRegion={setActiveRegion}
-                      activeOni={activeOni}
-                      onChangeOni={setActiveOni}
-                      historicalRecords={historicalRecords}
-                      onPlayStateChange={setIsPlaying}
-                    />
+                  {/* FULL-WIDTH LARGE CLIMATE MAP */}
+                  <ClimateMap 
+                    regions={filteredRegions}
+                    activeRegion={activeRegion}
+                    onSelectRegion={setActiveRegion}
+                    activeOni={activeOni}
+                    onChangeOni={setActiveOni}
+                    historicalRecords={historicalRecords}
+                    onPlayStateChange={setIsPlaying}
+                  />
 
-                    {/* DYNAMIC SPATIO-TEMPORAL CHARTS, TEMPERATURE HEATMAP AND MONSOON BAR CHARTS */}
-                    <DashboardCharts 
-                      regions={filteredRegions}
-                      historicalRecords={historicalRecords}
-                      activeOni={activeOni}
-                      onSelectOni={setActiveOni}
-                      isDark={isDark}
-                    />
-                    
-                    {/* STATUS TICKER AND STATS FEED */}
-                    <div className={`rounded-3xl border p-4.5 font-mono text-xs ${
-                      isDark ? "bg-slate-900/60 border-slate-800 text-slate-400" : "bg-white border-slate-200 text-slate-650"
-                    }`}>
-                      <div className="flex justify-between items-center border-b border-slate-850 pb-2 mb-2 select-none">
-                        <span className="uppercase text-[9px] font-bold">Recon-Server Sync logs</span>
-                        <span className="text-cyan-400">Total Activities: {statusLogs.length} events</span>
-                      </div>
-                      <div className="space-y-1">
-                        {statusLogs.map((log, i) => (
-                          <div key={i} className="truncate">📡 {log}</div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* RIGHT: ONI Controllers + AI insights briefs: 4 cols */}
-                  <div className="xl:col-span-4 flex flex-col gap-6 justify-between">
-                    {/* BENTO CONTROLLER */}
-                    <div className={`rounded-3xl border p-6 flex flex-col justify-between h-50% ${
-                      isDark ? "bg-[#0b1021] border-slate-850" : "bg-white border-slate-200"
-                    }`}>
-                      <div className="space-y-3.5">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <span className="text-[9px] uppercase font-mono font-bold tracking-widest text-cyan-400">Boundary parameter</span>
-                            <h3 className="text-base font-sans font-bold text-white tracking-tight leading-none mt-1">ENSO SST Boundary Force</h3>
-                          </div>
-                        </div>
-
-                        <p className="text-xs text-slate-400 leading-relaxed font-sans">
+                  {/* BOUNDARY PARAMETER: ENSO SST BOUNDARY FORCE (SINGLE COLUMN, FULL WIDTH) */}
+                  <div className={`rounded-3xl border p-6 flex flex-col gap-5 ${
+                    isDark ? "bg-[#0b1021] border-slate-800" : "bg-white border-slate-200"
+                  }`}>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div>
+                        <span className="text-[10px] uppercase font-mono font-bold tracking-widest text-cyan-400 block">Boundary parameter</span>
+                        <h3 className={`text-base font-sans font-bold tracking-tight leading-none mt-1 ${isDark ? "text-white" : "text-slate-900"}`}>
+                          ENSO SST Boundary Force
+                        </h3>
+                        <p className={`text-xs leading-relaxed font-sans mt-1.5 ${isDark ? "text-slate-400" : "text-slate-600"}`}>
                           Drag the slider dynamically to adjust equatorial warm pools anomalies from Super La Niña (-3.0°C) to Super El Niño (+3.0°C).
                         </p>
-
-                        <div className="space-y-2">
-                          <input
-                            type="range"
-                            min="-3.0"
-                            max="3.0"
-                            step="0.1"
-                            value={activeOni}
-                            onChange={(e) => setActiveOni(parseFloat(e.target.value))}
-                            className="w-full h-1.5 bg-gradient-to-r from-blue-500 via-slate-600 to-red-500 rounded-lg appearance-none cursor-pointer"
-                          />
-                          <div className="flex justify-between text-[11px] font-mono text-slate-500 font-bold">
-                            <span>-3.0°C (La Niña)</span>
-                            <span className="text-white bg-slate-950 px-2 py-0.5 rounded border border-slate-850 font-extrabold text-cyan-400">{activeOni >= 0 ? "+" : ""}{activeOni.toFixed(1)}°C</span>
-                            <span>+3.0°C (El Niño)</span>
-                          </div>
-                        </div>
                       </div>
-
-                      <div className="grid grid-cols-3 gap-1 pt-3.5 border-t border-slate-850">
-                        <button
-                          onClick={() => setActiveOni(2.2)}
-                          className="py-1 px-1.5 bg-slate-950 hover:bg-slate-850 text-[10px] text-rose-450 border border-slate-850 font-semibold font-mono rounded-lg transition-all"
-                        >
-                          🔥 El Niño
-                        </button>
-                        <button
-                          onClick={() => setActiveOni(-1.8)}
-                          className="py-1 px-1.5 bg-slate-950 hover:bg-slate-850 text-[10px] text-cyan-400 border border-slate-850 font-semibold font-mono rounded-lg transition-all"
-                        >
-                          ❄ La Niña
-                        </button>
-                        <button
-                          onClick={() => setActiveOni(0.0)}
-                          className="py-1 px-1.5 bg-slate-950 hover:bg-slate-850 text-[10px] text-slate-400 border border-slate-850 font-semibold font-mono rounded-lg transition-all"
-                        >
-                          ● Neutral
-                        </button>
+                      <div className={`px-4 py-2 rounded-xl border font-mono text-sm font-extrabold shrink-0 self-start sm:self-center ${
+                        isDark ? "bg-slate-950 border-slate-800 text-cyan-400" : "bg-slate-100 border-slate-300 text-cyan-700"
+                      }`}>
+                        {activeOni >= 0 ? "+" : ""}{activeOni.toFixed(1)}°C
                       </div>
                     </div>
 
-                    {/* GEMINI REAL-TIME KNOWLEDGE BRIEF */}
-                    <div className={`rounded-3xl border p-6 flex flex-col justify-between h-50% relative overflow-hidden ${
-                      isDark ? "bg-[#0b1021] border-slate-855 text-slate-300" : "bg-white border-slate-200"
-                    }`}>
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between pb-3.5 border-b border-slate-800/20">
-                          <div className="flex items-center gap-1.5">
-                            <Sparkles className="w-4 h-4 text-cyan-400 animate-pulse" />
-                            <h3 className="text-sm font-bold text-slate-100 uppercase tracking-wider font-sans">Gemini Intelligence</h3>
-                          </div>
-                          <span className="text-[10px] text-slate-500 font-mono">diagnostic summary v3.5</span>
-                        </div>
-
-                        {activeRegion ? (
-                          <div className="space-y-3">
-                            <div className="text-xs font-mono font-bold text-white flex items-center gap-1.5 bg-slate-950/60 py-1.5 px-3 rounded-xl border border-slate-850">
-                              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
-                              <span>Region focus: {activeRegion.name}</span>
-                            </div>
-
-                            {briefLoading ? (
-                              <div className="text-center py-6 text-slate-500 font-mono text-[11px] animate-pulse">Running live diagnostics on dynamic teleconnection wave-guides...</div>
-                            ) : (
-                              <div className="text-[11px] leading-relaxed max-h-40 overflow-y-auto scrollbar-thin space-y-2 font-serif text-slate-350">
-                                {briefText ? briefText.split("\n").map((line, idx) => (
-                                  <p key={idx}>{line}</p>
-                                )) : "Awaiting response matrix..."}
-                              </div>
-                            )}
-                          </div>
-                        ) : (
-                          <div className="text-slate-500 italic text-center py-8">Select a station coordinates region above to generate insights.</div>
-                        )}
+                    <div className="space-y-2.5">
+                      <input
+                        type="range"
+                        min="-3.0"
+                        max="3.0"
+                        step="0.1"
+                        value={activeOni}
+                        onChange={(e) => setActiveOni(parseFloat(e.target.value))}
+                        className="w-full h-2 bg-gradient-to-r from-blue-500 via-slate-600 to-red-500 rounded-lg appearance-none cursor-pointer"
+                      />
+                      <div className="flex justify-between text-xs font-mono text-slate-500 font-bold">
+                        <span>-3.0°C (La Niña)</span>
+                        <span className={`px-2.5 py-0.5 rounded border font-extrabold ${
+                          isDark ? "bg-slate-950 border-slate-800 text-cyan-400" : "bg-slate-100 border-slate-300 text-cyan-700"
+                        }`}>
+                          {activeOni >= 0 ? "+" : ""}{activeOni.toFixed(1)}°C
+                        </span>
+                        <span>+3.0°C (El Niño)</span>
                       </div>
+                    </div>
 
-                      <div className="text-[9px] text-zinc-500 font-mono pt-3 border-t border-slate-850 text-right">
-                        Ref: {briefSource}
-                      </div>
+                    <div className="grid grid-cols-3 gap-3 pt-4 border-t border-slate-800/30">
+                      <button
+                        onClick={() => setActiveOni(2.2)}
+                        className={`py-2.5 px-3 border text-xs font-semibold font-mono rounded-xl transition-all cursor-pointer ${
+                          isDark
+                            ? "bg-slate-950 hover:bg-slate-900 text-rose-400 border-slate-800"
+                            : "bg-rose-50 hover:bg-rose-100 text-rose-700 border-rose-200"
+                        }`}
+                      >
+                        🔥 El Niño
+                      </button>
+                      <button
+                        onClick={() => setActiveOni(-1.8)}
+                        className={`py-2.5 px-3 border text-xs font-semibold font-mono rounded-xl transition-all cursor-pointer ${
+                          isDark
+                            ? "bg-slate-950 hover:bg-slate-900 text-cyan-400 border-slate-800"
+                            : "bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border-cyan-200"
+                        }`}
+                      >
+                        ❄ La Niña
+                      </button>
+                      <button
+                        onClick={() => setActiveOni(0.0)}
+                        className={`py-2.5 px-3 border text-xs font-semibold font-mono rounded-xl transition-all cursor-pointer ${
+                          isDark
+                            ? "bg-slate-950 hover:bg-slate-900 text-slate-300 border-slate-800"
+                            : "bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-300"
+                        }`}
+                      >
+                        ● Neutral
+                      </button>
                     </div>
                   </div>
+
+                  {/* GEMINI REAL-TIME KNOWLEDGE BRIEF */}
+                  <div className={`rounded-3xl border p-6 flex flex-col justify-between gap-4 relative overflow-hidden ${
+                    isDark ? "bg-[#0b1021] border-slate-800 text-slate-300" : "bg-white border-slate-200 text-slate-700"
+                  }`}>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between pb-3.5 border-b border-slate-800/20">
+                        <div className="flex items-center gap-1.5">
+                          <Sparkles className="w-4 h-4 text-cyan-400 animate-pulse" />
+                          <h3 className={`text-sm font-bold uppercase tracking-wider font-sans ${isDark ? "text-slate-100" : "text-slate-900"}`}>
+                            Gemini Intelligence
+                          </h3>
+                        </div>
+                        <span className="text-[10px] text-slate-500 font-mono">diagnostic summary v3.5</span>
+                      </div>
+
+                      {activeRegion ? (
+                        <div className="space-y-3">
+                          <div className={`text-xs font-mono font-bold flex items-center gap-2 py-2 px-3 rounded-xl border ${
+                            isDark ? "text-white bg-slate-950/60 border-slate-800" : "text-slate-900 bg-slate-100 border-slate-200"
+                          }`}>
+                            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
+                            <span>Region focus: {activeRegion.name}</span>
+                          </div>
+
+                          {briefLoading ? (
+                            <div className="text-center py-6 text-slate-500 font-mono text-xs animate-pulse">Running live diagnostics on dynamic teleconnection wave-guides...</div>
+                          ) : (
+                            <div className={`text-xs leading-relaxed space-y-2 font-serif ${isDark ? "text-slate-300" : "text-slate-700"}`}>
+                              {briefText ? briefText.split("\n").map((line, idx) => (
+                                <p key={idx}>{line}</p>
+                              )) : "Awaiting response matrix..."}
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="text-slate-500 italic text-center py-8">Select a station coordinates region above to generate insights.</div>
+                      )}
+                    </div>
+
+                    <div className="text-[10px] text-zinc-500 font-mono pt-3 border-t border-slate-800/30 text-right">
+                      Ref: {briefSource}
+                    </div>
+                  </div>
+
+                  {/* DYNAMIC SPATIO-TEMPORAL CHARTS, TEMPERATURE HEATMAP AND MONSOON BAR CHARTS */}
+                  <DashboardCharts 
+                    regions={filteredRegions}
+                    historicalRecords={historicalRecords}
+                    activeOni={activeOni}
+                    onSelectOni={setActiveOni}
+                    isDark={isDark}
+                  />
+                  
+                  {/* STATUS TICKER AND STATS FEED */}
+                  <div className={`rounded-3xl border p-4.5 font-mono text-xs ${
+                    isDark ? "bg-slate-900/60 border-slate-800 text-slate-400" : "bg-white border-slate-200 text-slate-600"
+                  }`}>
+                    <div className="flex justify-between items-center border-b border-slate-800/40 pb-2 mb-2 select-none">
+                      <span className="uppercase text-[9px] font-bold">Recon-Server Sync logs</span>
+                      <span className="text-cyan-400">Total Activities: {statusLogs.length} events</span>
+                    </div>
+                    <div className="space-y-1">
+                      {statusLogs.map((log, i) => (
+                        <div key={i} className="truncate">📡 {log}</div>
+                      ))}
+                    </div>
+                  </div>
+
                 </div>
               </div>
             )}

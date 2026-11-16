@@ -402,13 +402,13 @@ export default function ClimateMap({
         </div>
       </div>
 
-      {/* CORE ANALYSIS WORKSPACE GRID (MAP + INTERACTIVE LEGEND) */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+      {/* CORE ANALYSIS WORKSPACE (FULL-WIDTH LARGE MAP + CONTROLS & LEGEND BELOW) */}
+      <div className="flex flex-col gap-5">
         
-        {/* LEFT COMPONENT: PHYSICAL SATELLITE MAP (8/12) */}
-        <div className="xl:col-span-8 flex flex-col gap-4">
+        {/* FULL-WIDTH PHYSICAL SATELLITE MAP */}
+        <div className="flex flex-col gap-4 w-full">
           
-          <div className="relative w-full aspect-[2/1] rounded-2xl border border-slate-800/80 bg-[#020510] overflow-hidden select-none group shadow-inner">
+          <div className="relative w-full aspect-[2/1] min-h-[340px] rounded-2xl border border-slate-800/80 bg-[#020510] overflow-hidden select-none group shadow-inner">
             
             {/* Map Drag / Grab Overlay */}
             <div 
@@ -1116,14 +1116,14 @@ export default function ClimateMap({
 
         </div>
 
-        {/* RIGHT COMPONENT: INTERACTIVE IMPACT DESCRIPTION LEGEND (4/12) */}
-        <div className="xl:col-span-4 flex flex-col justify-between h-full">
+        {/* INTERACTIVE IMPACT DESCRIPTION & STATION PROFILE (BELOW MAP) */}
+        <div className="w-full">
           
           {activeLayer === "impacts" ? (
-            <div className="flex flex-col h-full justify-between gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
               
               {/* LEGEND BOX CONTAINER */}
-              <div className="bg-[#030712] border border-slate-850 rounded-2xl p-5 flex flex-col h-[280px]">
+              <div className="bg-[#030712] border border-slate-800 rounded-2xl p-5 flex flex-col h-[300px]">
                 <div className="border-b border-slate-800/60 pb-3 mb-3 shrink-0">
                   <h3 className="text-xs font-bold text-slate-100 uppercase tracking-widest font-mono">
                     Impact Description
@@ -1133,10 +1133,9 @@ export default function ClimateMap({
                   </p>
                 </div>
 
-                {/* SCROLLABLE LIST OF IMPACTS WITH MATCHING COLORS (From Screenshot) */}
+                {/* SCROLLABLE LIST OF IMPACTS WITH MATCHING COLORS */}
                 <div className="flex-grow overflow-y-auto space-y-2 pr-1.5 scrollbar-thin select-none">
                   {activeYearRecords.map((record) => {
-                    // Match location metadata to grab ID for coloring
                     const loc = LOCATIONS.find(l => l.country === record.country && l.name === record.region);
                     if (!loc) return null;
 
@@ -1152,19 +1151,18 @@ export default function ClimateMap({
                         onMouseLeave={() => setHoveredLocationId(null)}
                         className={`p-2 rounded-xl border transition-all duration-250 cursor-pointer flex items-start gap-2.5 ${
                           isSelected 
-                            ? "bg-slate-900 border-slate-750 text-white shadow-md shadow-cyan-900/5" 
+                            ? "bg-slate-900 border-slate-700 text-white shadow-md shadow-cyan-900/5" 
                             : isHovered
                               ? "bg-[#080d1e]/50 border-slate-800/80 text-slate-200"
-                              : "bg-transparent border-transparent text-slate-400 hover:text-slate-350"
+                              : "bg-transparent border-transparent text-slate-400 hover:text-slate-300"
                         }`}
                       >
-                        {/* Custom Colored Bullet Checkbox representation */}
                         <div 
                           style={{ backgroundColor: color }}
                           className="w-3.5 h-3.5 rounded mt-0.5 shrink-0 border border-white/20 transition-transform duration-250 hover:scale-110"
                         />
                         
-                        <div className="text-[10px] leading-tight font-sans">
+                        <div className="text-[11px] leading-snug font-sans">
                           <span className="font-bold text-slate-200 mr-1.5">{loc.country}:</span>
                           <span className="font-normal italic">{record.impactDescription}</span>
                         </div>
@@ -1174,43 +1172,43 @@ export default function ClimateMap({
                 </div>
               </div>
 
-              {/* ACTIVE SELECTION DETAIL RESEARCH BRIEF (Drives massive learning value) */}
+              {/* ACTIVE SELECTION DETAIL RESEARCH BRIEF */}
               {selectedImpactRecord && (
-                <div className="bg-[#030712] border border-slate-850 p-4.5 rounded-2xl text-xs space-y-3 shadow-md animate-fade-in shrink-0">
-                  <div className="flex justify-between items-center pb-2.5 border-b border-slate-800/40">
+                <div className="bg-[#030712] border border-slate-800 p-5 rounded-2xl text-xs space-y-4 shadow-md flex flex-col justify-between h-[300px]">
+                  <div className="flex justify-between items-center pb-3 border-b border-slate-800/60">
                     <div>
                       <span className="text-[9px] font-mono text-cyan-400 uppercase font-bold tracking-widest block">Geospatial Station Profile</span>
                       <h4 className="font-bold text-slate-200 text-sm tracking-tight mt-0.5">
                         {selectedImpactRecord.region}, {selectedImpactRecord.country}
                       </h4>
                     </div>
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
-                      selectedImpactRecord.severity === "Extreme" ? "bg-rose-950/90 text-rose-450 border border-rose-800/30" :
-                      selectedImpactRecord.severity === "High" ? "bg-amber-950/80 text-amber-500 border border-amber-800/30" :
-                      "bg-emerald-950/80 text-emerald-400 border border-emerald-800/30"
+                    <span className={`px-2.5 py-1 rounded text-[10px] font-mono font-bold ${
+                      selectedImpactRecord.severity === "Extreme" ? "bg-rose-950/90 text-rose-400 border border-rose-800/40" :
+                      selectedImpactRecord.severity === "High" ? "bg-amber-950/80 text-amber-400 border border-amber-800/40" :
+                      "bg-emerald-950/80 text-emerald-400 border border-emerald-800/40"
                     }`}>
                       {selectedImpactRecord.severity.toUpperCase()} IMPACT
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2 text-[10px] font-mono">
-                    <div className="bg-[#080c18] border border-slate-850 p-2 rounded-xl">
-                      <span className="text-[8px] text-slate-500 block uppercase">Temp Anomaly</span>
-                      <span className={`font-bold mt-0.5 block ${selectedImpactRecord.temperatureAnomaly >= 0 ? "text-rose-400" : "text-cyan-400"}`}>
+                  <div className="grid grid-cols-2 gap-3 text-[11px] font-mono">
+                    <div className="bg-[#080c18] border border-slate-800 p-3 rounded-xl">
+                      <span className="text-[9px] text-slate-500 block uppercase">Temp Anomaly</span>
+                      <span className={`font-bold text-sm mt-1 block ${selectedImpactRecord.temperatureAnomaly >= 0 ? "text-rose-400" : "text-cyan-400"}`}>
                         {selectedImpactRecord.temperatureAnomaly >= 0 ? "+" : ""}{selectedImpactRecord.temperatureAnomaly}°C
                       </span>
                     </div>
-                    <div className="bg-[#080c18] border border-slate-850 p-2 rounded-xl">
-                      <span className="text-[8px] text-slate-500 block uppercase">Rainfall anomaly</span>
-                      <span className={`font-bold mt-0.5 block ${selectedImpactRecord.rainfallAnomaly >= 0 ? "text-cyan-400" : "text-amber-500"}`}>
+                    <div className="bg-[#080c18] border border-slate-800 p-3 rounded-xl">
+                      <span className="text-[9px] text-slate-500 block uppercase">Rainfall Anomaly</span>
+                      <span className={`font-bold text-sm mt-1 block ${selectedImpactRecord.rainfallAnomaly >= 0 ? "text-cyan-400" : "text-amber-400"}`}>
                         {selectedImpactRecord.rainfallAnomaly >= 0 ? "+" : ""}{selectedImpactRecord.rainfallAnomaly}% shift
                       </span>
                     </div>
                   </div>
 
-                  <div className="space-y-1 bg-[#02050f]/60 p-3 rounded-xl border border-slate-900 leading-normal">
-                    <span className="text-[8px] font-mono text-zinc-500 uppercase font-bold">Scientific Assessment:</span>
-                    <p className="text-[10px] font-serif italic text-slate-350 mt-0.5">
+                  <div className="space-y-1 bg-[#02050f]/60 p-3.5 rounded-xl border border-slate-900 leading-relaxed">
+                    <span className="text-[9px] font-mono text-zinc-500 uppercase font-bold">Scientific Assessment:</span>
+                    <p className="text-xs font-serif italic text-slate-300 mt-0.5">
                       "{selectedImpactRecord.impactDescription}"
                     </p>
                   </div>
@@ -1220,7 +1218,7 @@ export default function ClimateMap({
             </div>
           ) : (
             /* SCIENTIFIC REGIONAL VIEW LEGEND AND GRAPH VALUES */
-            <div className="bg-[#030712] border border-slate-850 rounded-2xl p-5 flex flex-col justify-between h-full min-h-[350px]">
+            <div className="bg-[#030712] border border-slate-800 rounded-2xl p-5 flex flex-col justify-between gap-4">
               <div className="space-y-4">
                 <div className="border-b border-slate-800/60 pb-3">
                   <h3 className="text-xs font-bold text-slate-100 uppercase tracking-widest font-mono">
@@ -1232,14 +1230,14 @@ export default function ClimateMap({
                 </div>
 
                 {activeRegion ? (
-                  <div className="space-y-4">
-                    <div className="bg-[#080c18] p-3 rounded-xl border border-slate-850 font-mono space-y-1">
-                      <span className="text-[8px] text-slate-500 uppercase font-bold">Selected Grid Block</span>
-                      <div className="text-xs font-bold text-white leading-tight">{activeRegion.name}</div>
-                      <div className="text-[9px] text-slate-400 mt-1">{activeRegion.desc}</div>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div className="bg-[#080c18] p-4 rounded-xl border border-slate-800 font-mono space-y-1.5">
+                      <span className="text-[9px] text-slate-500 uppercase font-bold">Selected Grid Block</span>
+                      <div className="text-sm font-bold text-white leading-tight">{activeRegion.name}</div>
+                      <div className="text-[11px] text-slate-400 mt-1 leading-relaxed">{activeRegion.desc}</div>
                     </div>
 
-                    <div className="space-y-2.5 text-xs font-mono">
+                    <div className="space-y-2 text-xs font-mono bg-[#080c18] p-4 rounded-xl border border-slate-800">
                       <div className="flex justify-between items-center py-1 border-b border-slate-900">
                         <span className="text-slate-500">Climatology normal (Temp)</span>
                         <span className="text-slate-300 font-bold">{activeRegion.averageTemp}°C</span>
@@ -1250,11 +1248,11 @@ export default function ClimateMap({
                       </div>
                       <div className="flex justify-between items-center py-1 border-b border-slate-900">
                         <span className="text-slate-500">Calculated Anomaly (Temp)</span>
-                        <span className={`font-bold ${activeOni >= 0 ? "text-rose-450" : "text-blue-400"}`}>
+                        <span className={`font-bold ${activeOni >= 0 ? "text-rose-400" : "text-blue-400"}`}>
                           {activeOni >= 0 ? "+" : ""}{(activeRegion.tempCoef * activeOni).toFixed(2)}°C
                         </span>
                       </div>
-                      <div className="flex justify-between items-center py-1 border-b border-slate-900">
+                      <div className="flex justify-between items-center py-1">
                         <span className="text-slate-500">Calculated Anomaly (Rain)</span>
                         <span className={`font-bold ${activeOni >= 0 ? "text-sky-400" : "text-orange-400"}`}>
                           {activeOni >= 0 ? "+" : ""}{Math.round(activeRegion.precipCoef * activeOni)} mm/mo
@@ -1263,13 +1261,13 @@ export default function ClimateMap({
                     </div>
                   </div>
                 ) : (
-                  <div className="text-center py-12 text-slate-500 italic text-xs font-sans">
+                  <div className="text-center py-8 text-slate-500 italic text-xs font-sans">
                     Click any regional coordinate dot on the map to display calculated climatology coefficients.
                   </div>
                 )}
               </div>
 
-              <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-850/40 text-[9px] text-slate-500 leading-normal flex items-start gap-1.5">
+              <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800/60 text-[10px] text-slate-500 leading-normal flex items-start gap-2">
                 <Layers className="w-4 h-4 text-cyan-500 shrink-0 mt-0.5" />
                 <span>Geospatial layers are fully modeled using real meteorological coefficients. Anomaly outcomes scale continuously with the master ONI boundary controller.</span>
               </div>
