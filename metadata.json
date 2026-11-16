@@ -1,0 +1,6 @@
+{
+  "name": "El Niño Climate Fusion Dashboard",
+  "description": "Multi-Source Climate Fusion Layer & El Niño Impact Intelligence engine with predictive risk analytics",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
