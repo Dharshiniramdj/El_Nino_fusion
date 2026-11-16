@@ -109,23 +109,37 @@ export default function DashboardCharts({
     });
   }, [yearlyData, yearRange]);
 
+  // Lookup map of peak ONI per year for accurate SST Hovmöller Heatmap values
+  const yearlyPeakOniMap = useMemo(() => {
+    const map: Record<number, number> = {};
+    yearlyData.forEach((d) => {
+      map[d.year] = d.oniPeak;
+    });
+    return map;
+  }, [yearlyData]);
+
   // 2. Bar Chart Data: dynamic rainfall shifts of regions based on active ONI state
-  // We model the actual rainfall anomaly shift during active ONI, matching the screenshot perfectly!
   const regionalRainfallData = useMemo(() => {
     if (!regions || regions.length === 0) return [];
     
+    const shortLabels: Record<string, string> = {
+      eq_pacific: "Niño 3.4",
+      se_asia: "SE Asia",
+      s_america_west: "Peru Coast",
+      australia_east: "Australia",
+      us_south: "US South",
+      east_africa: "E. Africa",
+      sa_brazil_north: "Amazonia",
+      us_pacific_nw: "US NW"
+    };
+
     return regions.map((r) => {
-      // Precip percent anomaly computed on backend, or we fallback compute:
       const shift = r.precipPercentAnomaly !== undefined ? r.precipPercentAnomaly : Math.round(r.precipCoef * activeOni);
       
       return {
         id: r.id,
         name: r.name,
-        // Shorten name to match screenshot aesthetic (e.g., Sumatra & Borneo -> Indonesia)
-        shortName: r.id === "se_asia" ? "SE Asia" :
-                   r.id === "s_america_west" ? "Peru Coast" :
-                   r.id === "australia_east" ? "Australia" :
-                   r.id === "us_south" ? "US South" : r.name,
+        shortName: shortLabels[r.id] || r.name.split(" ")[0],
         rainfallAnomaly: shift,
         tempAnomaly: r.calculatedTempAnomaly !== undefined ? r.calculatedTempAnomaly : Math.round(r.tempCoef * activeOni * 100) / 100,
         hazardLevel: r.hazardLevel || "Low"
@@ -164,24 +178,26 @@ export default function DashboardCharts({
     if (val > 1.5) return "bg-rose-600/90 hover:bg-rose-500 border-rose-500 text-white";
     if (val > 0.8) return "bg-red-500/80 hover:bg-red-400 border-red-400 text-white";
     if (val > 0.3) return "bg-orange-500/65 hover:bg-orange-400 border-orange-400 text-white";
-    if (val > -0.3) return "bg-slate-900 border-slate-800 text-slate-400";
+    if (val > -0.3) return isDark ? "bg-slate-900 border-slate-800 text-slate-400" : "bg-slate-200 border-slate-300 text-slate-700";
     if (val > -0.8) return "bg-sky-600/70 hover:bg-sky-500 border-sky-500 text-white";
     return "bg-blue-600/90 hover:bg-blue-500 border-blue-400 text-white";
   };
 
   return (
     <div id="analytics-climatology-workbench" className={`rounded-3xl border p-5 space-y-5 transition-all duration-300 ${
-      isDark ? "bg-[#0b1021] border-slate-850" : "bg-white border-slate-200"
+      isDark ? "bg-[#0b1021] border-slate-800" : "bg-white border-slate-200 shadow-sm"
     }`}>
       {/* SECTION HEADER BAR */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-800/20 pb-4">
+      <div className={`flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b pb-4 ${
+        isDark ? "border-slate-800/60" : "border-slate-200"
+      }`}>
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="p-1.5 bg-cyan-950 text-cyan-400 rounded-lg">
+            <span className={`p-1.5 rounded-lg ${isDark ? "bg-cyan-950 text-cyan-400" : "bg-cyan-100 text-cyan-700"}`}>
               <Sparkles className="w-4 h-4" />
             </span>
-            <h3 className="text-sm font-sans font-bold tracking-tight text-white uppercase">
-              Oceanic & Atmospheric Climatology Analytics
+            <h3 className={`text-sm font-sans font-bold tracking-tight uppercase ${isDark ? "text-white" : "text-slate-900"}`}>
+              Oceanic &amp; Atmospheric Climatology Analytics
             </h3>
           </div>
           <span className="text-[10px] font-mono text-slate-500 block">
@@ -192,46 +208,52 @@ export default function DashboardCharts({
         {/* CONTROLS & SWITCHES */}
         <div className="flex items-center gap-2">
           {/* Main Panel Mode Toggles */}
-          <div className="flex bg-slate-950 p-0.5 rounded-xl border border-slate-850 text-[10px] font-mono flex-wrap">
+          <div className={`flex p-0.5 rounded-xl border text-[10px] font-mono flex-wrap ${
+            isDark ? "bg-slate-950 border-slate-800" : "bg-slate-100 border-slate-200"
+          }`}>
             <button 
+              type="button"
               onClick={() => setActiveTab("charts")}
               className={`px-3 py-1.5 rounded-lg cursor-pointer flex items-center gap-1.5 transition-all ${
                 activeTab === "charts" 
-                  ? "bg-slate-800 text-cyan-400 font-bold" 
-                  : "text-slate-500 hover:text-slate-350"
+                  ? isDark ? "bg-slate-800 text-cyan-400 font-bold" : "bg-white text-cyan-700 font-bold shadow-sm"
+                  : isDark ? "text-slate-400 hover:text-slate-200" : "text-slate-600 hover:text-slate-900"
               }`}
             >
               <LucideLineChart className="w-3.5 h-3.5" />
               Core Anomalies
             </button>
             <button 
+              type="button"
               onClick={() => setActiveTab("multiline")}
               className={`px-3 py-1.5 rounded-lg cursor-pointer flex items-center gap-1.5 transition-all ${
                 activeTab === "multiline" 
-                  ? "bg-slate-800 text-cyan-400 font-bold" 
-                  : "text-slate-500 hover:text-slate-350"
+                  ? isDark ? "bg-slate-800 text-cyan-400 font-bold" : "bg-white text-cyan-700 font-bold shadow-sm"
+                  : isDark ? "text-slate-400 hover:text-slate-200" : "text-slate-600 hover:text-slate-900"
               }`}
             >
               <TrendingUp className="w-3.5 h-3.5" />
               Multi-Line Comparison
             </button>
             <button 
+              type="button"
               onClick={() => setActiveTab("heatmap")}
               className={`px-3 py-1.5 rounded-lg cursor-pointer flex items-center gap-1.5 transition-all ${
                 activeTab === "heatmap" 
-                  ? "bg-slate-800 text-cyan-400 font-bold" 
-                  : "text-slate-500 hover:text-slate-350"
+                  ? isDark ? "bg-slate-800 text-cyan-400 font-bold" : "bg-white text-cyan-700 font-bold shadow-sm"
+                  : isDark ? "text-slate-400 hover:text-slate-200" : "text-slate-600 hover:text-slate-900"
               }`}
             >
               <Grid3X3 className="w-3.5 h-3.5" />
               SST Hovmöller Heatmap
             </button>
             <button 
+              type="button"
               onClick={() => setActiveTab("coverage")}
               className={`px-3 py-1.5 rounded-lg cursor-pointer flex items-center gap-1.5 transition-all ${
                 activeTab === "coverage" 
-                  ? "bg-slate-800 text-cyan-400 font-bold" 
-                  : "text-slate-500 hover:text-slate-350"
+                  ? isDark ? "bg-slate-800 text-cyan-400 font-bold" : "bg-white text-cyan-700 font-bold shadow-sm"
+                  : isDark ? "text-slate-400 hover:text-slate-200" : "text-slate-600 hover:text-slate-900"
               }`}
             >
               <BarChart3 className="w-3.5 h-3.5" />
@@ -246,22 +268,28 @@ export default function DashboardCharts({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
           
           {/* LEFT: LINE CHART (7/12 cols) */}
-          <div className="lg:col-span-7 bg-slate-950/40 border border-slate-850/60 rounded-2xl p-4 flex flex-col justify-between">
-            <div className="flex items-center justify-between pb-2 mb-2">
-              <div className="space-y-0.5">
+          <div className={`lg:col-span-7 min-w-0 border rounded-2xl p-4 flex flex-col justify-between ${
+            isDark ? "bg-slate-950/40 border-slate-800/80" : "bg-slate-50 border-slate-200"
+          }`}>
+            <div className="flex items-center justify-between gap-2 pb-2 mb-2">
+              <div className="space-y-0.5 min-w-0">
                 <span className="text-[9px] uppercase font-mono text-slate-500 font-bold block">
                   Global Temperature Anomalies
                 </span>
-                <h4 className="text-xs font-sans font-extrabold text-slate-200">
+                <h4 className={`text-xs font-sans font-extrabold ${isDark ? "text-slate-200" : "text-slate-900"}`}>
                   Surface warming trajectory vs ENSO index
                 </h4>
               </div>
 
-              {/* Year range dropdown (From Screenshot) */}
+              {/* Year range dropdown */}
               <select
                 value={yearRange}
-                onChange={(e: any) => setYearRange(e.target.value)}
-                className="bg-slate-950 border border-slate-850 text-[10px] font-mono text-slate-355 px-2.5 py-1 rounded-xl focus:outline-none"
+                onChange={(e) => setYearRange(e.target.value as "all" | "modern" | "2010" | "2015")}
+                className={`border text-[10px] font-mono px-2.5 py-1 rounded-xl focus:outline-none cursor-pointer shrink-0 ${
+                  isDark
+                    ? "bg-slate-950 border-slate-800 text-slate-200"
+                    : "bg-white border-slate-300 text-slate-800"
+                }`}
               >
                 <option value="2015">2015 - 2026</option>
                 <option value="2010">2010 - 2026</option>
@@ -271,54 +299,66 @@ export default function DashboardCharts({
             </div>
 
             {/* Line chart wrapper */}
-            <div className="h-56 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={filteredYearlyData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="gradientAnomaly" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#22d3ee" stopOpacity={0.25} />
-                      <stop offset="95%" stopColor="#22d3ee" stopOpacity={0.0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" opacity={0.3} />
-                  <XAxis 
-                    dataKey="year" 
-                    stroke="#475569" 
-                    fontSize={9} 
-                    fontFamily="JetBrains Mono" 
-                    tickLine={false}
-                  />
-                  <YAxis 
-                    stroke="#475569" 
-                    fontSize={9} 
-                    fontFamily="JetBrains Mono" 
-                    domain={["auto", "auto"]} 
-                    tickLine={false}
-                  />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: "#020617", 
-                      borderColor: "#1e293b", 
-                      borderRadius: "12px",
-                      fontSize: "11px",
-                      fontFamily: "JetBrains Mono"
-                    }}
-                    formatter={(val: any) => [`+${val}°C`, "Anomaly"]}
-                  />
-                  <Area 
-                    type="monotone" 
-                    dataKey="tempAnomaly" 
-                    stroke="#22d3ee" 
-                    strokeWidth={2}
-                    fillOpacity={1} 
-                    fill="url(#gradientAnomaly)" 
-                    name="Global Temp Anom"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
+            <div className="w-full min-h-[224px]">
+              {filteredYearlyData.length === 0 ? (
+                <div className="h-[224px] flex items-center justify-center text-xs font-mono text-slate-500">
+                  Loading surface warming trajectory...
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height={224} initialDimension={{ width: 520, height: 224 }}>
+                  <AreaChart data={filteredYearlyData} margin={{ top: 10, right: 12, left: 0, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="gradientAnomaly" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#22d3ee" stopOpacity={0.28} />
+                        <stop offset="95%" stopColor="#22d3ee" stopOpacity={0.0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#1e293b" : "#cbd5e1"} opacity={0.35} />
+                    <XAxis 
+                      dataKey="year" 
+                      stroke="#64748b" 
+                      fontSize={9} 
+                      fontFamily="JetBrains Mono" 
+                      tickLine={false}
+                    />
+                    <YAxis 
+                      width={38}
+                      stroke="#64748b" 
+                      fontSize={9} 
+                      fontFamily="JetBrains Mono" 
+                      domain={["auto", "auto"]} 
+                      tickLine={false}
+                      tickFormatter={(val) => `${val > 0 ? "+" : ""}${val}°`}
+                    />
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: isDark ? "#020617" : "#ffffff", 
+                        borderColor: isDark ? "#1e293b" : "#cbd5e1", 
+                        borderRadius: "12px",
+                        fontSize: "11px",
+                        fontFamily: "JetBrains Mono",
+                        color: isDark ? "#f8fafc" : "#0f172a"
+                      }}
+                      formatter={(val: any) => [`${val >= 0 ? "+" : ""}${val}°C`, "Anomaly"]}
+                    />
+                    <Area 
+                      type="monotone" 
+                      dataKey="tempAnomaly" 
+                      stroke="#22d3ee" 
+                      strokeWidth={2}
+                      fillOpacity={1} 
+                      fill="url(#gradientAnomaly)" 
+                      name="Global Temp Anom"
+                      isAnimationActive={false}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              )}
             </div>
 
-            <div className="flex items-center justify-between text-[9px] text-slate-500 font-mono mt-3 pt-2.5 border-t border-slate-900">
+            <div className={`flex items-center justify-between text-[9px] text-slate-500 font-mono mt-3 pt-2.5 border-t ${
+              isDark ? "border-slate-900" : "border-slate-200"
+            }`}>
               <span className="flex items-center gap-1">
                 <Thermometer className="w-3.5 h-3.5 text-cyan-400" />
                 ERA5 Reanalysis Surface dataset
@@ -328,57 +368,73 @@ export default function DashboardCharts({
           </div>
 
           {/* RIGHT: BAR CHART (5/12 cols) */}
-          <div className="lg:col-span-5 bg-slate-950/40 border border-slate-850/60 rounded-2xl p-4 flex flex-col justify-between">
+          <div className={`lg:col-span-5 min-w-0 border rounded-2xl p-4 flex flex-col justify-between ${
+            isDark ? "bg-slate-950/40 border-slate-800/80" : "bg-slate-50 border-slate-200"
+          }`}>
             <div>
               <span className="text-[9px] uppercase font-mono text-slate-500 font-bold block">
                 Rainfall Impact by Region
               </span>
-              <h4 className="text-xs font-sans font-extrabold text-slate-200 mt-0.5">
+              <h4 className={`text-xs font-sans font-extrabold mt-0.5 ${isDark ? "text-slate-200" : "text-slate-900"}`}>
                 Monsoonal shift under {activeOni >= 0.5 ? "El Niño" : activeOni <= -0.5 ? "La Niña" : "Neutral"} ({activeOni >= 0 ? "+" : ""}{activeOni.toFixed(1)}°C ONI)
               </h4>
             </div>
 
             {/* Bar chart rendering */}
-            <div className="h-56 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={regionalRainfallData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" opacity={0.2} />
-                  <XAxis 
-                    dataKey="shortName" 
-                    stroke="#475569" 
-                    fontSize={9} 
-                    tickLine={false}
-                  />
-                  <YAxis 
-                    stroke="#475569" 
-                    fontSize={9} 
-                    fontFamily="JetBrains Mono"
-                    tickLine={false}
-                    tickFormatter={(val) => `${val}%`}
-                  />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: "#020617", 
-                      borderColor: "#1e293b", 
-                      borderRadius: "12px",
-                      fontSize: "11px",
-                      fontFamily: "JetBrains Mono"
-                    }}
-                    formatter={(val: any) => [`${val >= 0 ? "+" : ""}${val}%`, "Rainfall Shift"]}
-                  />
-                  {/* Zero reference line */}
-                  <ReferenceLine y={0} stroke="#475569" opacity={0.5} strokeWidth={1} />
-                  <Bar dataKey="rainfallAnomaly" fill="#f59e0b" radius={[4, 4, 0, 0]}>
-                    {regionalRainfallData.map((entry, index) => {
-                      const color = entry.rainfallAnomaly >= 0 ? "#22d3ee" : "#f59e0b";
-                      return <Cell key={`cell-rain-${index}`} fill={color} />;
-                    })}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+            <div className="w-full min-h-[224px]">
+              {regionalRainfallData.length === 0 ? (
+                <div className="h-[224px] flex items-center justify-center text-xs font-mono text-slate-500">
+                  Loading regional monsoonal anomalies...
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height={224} initialDimension={{ width: 360, height: 224 }}>
+                  <BarChart data={regionalRainfallData} margin={{ top: 10, right: 10, left: 0, bottom: 4 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#1e293b" : "#cbd5e1"} opacity={0.25} />
+                    <XAxis 
+                      dataKey="shortName" 
+                      stroke="#64748b" 
+                      fontSize={9} 
+                      interval={0}
+                      angle={-20}
+                      textAnchor="end"
+                      height={36}
+                      tickLine={false}
+                    />
+                    <YAxis 
+                      width={40}
+                      stroke="#64748b" 
+                      fontSize={9} 
+                      fontFamily="JetBrains Mono"
+                      tickLine={false}
+                      tickFormatter={(val) => `${val}%`}
+                    />
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: isDark ? "#020617" : "#ffffff", 
+                        borderColor: isDark ? "#1e293b" : "#cbd5e1", 
+                        borderRadius: "12px",
+                        fontSize: "11px",
+                        fontFamily: "JetBrains Mono",
+                        color: isDark ? "#f8fafc" : "#0f172a"
+                      }}
+                      formatter={(val: any) => [`${val >= 0 ? "+" : ""}${val}%`, "Rainfall Shift"]}
+                    />
+                    {/* Zero reference line */}
+                    <ReferenceLine y={0} stroke="#64748b" opacity={0.5} strokeWidth={1} />
+                    <Bar dataKey="rainfallAnomaly" fill="#f59e0b" radius={[4, 4, 0, 0]} isAnimationActive={false}>
+                      {regionalRainfallData.map((entry, index) => {
+                        const color = entry.rainfallAnomaly >= 0 ? "#22d3ee" : "#f59e0b";
+                        return <Cell key={`cell-rain-${index}`} fill={color} />;
+                      })}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
             </div>
 
-            <div className="flex items-center justify-between text-[9px] text-slate-500 font-mono mt-3 pt-2.5 border-t border-slate-900">
+            <div className={`flex items-center justify-between text-[9px] text-slate-500 font-mono mt-3 pt-2.5 border-t ${
+              isDark ? "border-slate-900" : "border-slate-200"
+            }`}>
               <span className="flex items-center gap-1">
                 <CloudRain className="w-3.5 h-3.5 text-amber-500" />
                 Drought vs. Pluvial anomalies
@@ -461,7 +517,7 @@ export default function DashboardCharts({
               })}
             </div>
             <span className="text-[9px] font-mono text-slate-500">
-              Click series to toggle • Click a year point to sync ONI
+              Click series to toggle • Click a year point to sync ONI ({activeOni >= 0 ? "+" : ""}{activeOni.toFixed(1)}°C)
             </span>
           </div>
 
@@ -473,13 +529,21 @@ export default function DashboardCharts({
                 Loading coupled climate time-series records...
               </div>
             ) : (
-              <ResponsiveContainer width="100%" height={270}>
+              <ResponsiveContainer width="100%" height={270} initialDimension={{ width: 820, height: 270 }}>
                 <LineChart
                   data={multiLineData}
                   margin={{ top: 10, right: 12, left: 0, bottom: 4 }}
                   onClick={(state: any) => {
-                    const idx = state?.activeTooltipIndex;
-                    if (typeof idx === "number" && multiLineData[idx]) {
+                    const labelYear = state?.activeLabel != null ? Number(state.activeLabel) : NaN;
+                    const matchByLabel = !Number.isNaN(labelYear)
+                      ? multiLineData.find((d) => d.year === labelYear)
+                      : undefined;
+                    if (matchByLabel) {
+                      onSelectOni(matchByLabel.oni);
+                      return;
+                    }
+                    const idx = state?.activeTooltipIndex != null ? Number(state.activeTooltipIndex) : NaN;
+                    if (!Number.isNaN(idx) && multiLineData[idx]) {
                       onSelectOni(multiLineData[idx].oni);
                     }
                   }}
@@ -588,26 +652,32 @@ export default function DashboardCharts({
 
       {/* HEATMAP GRID PORTAL */}
       {activeTab === "heatmap" && (
-        <div className="bg-slate-950/40 border border-slate-850/60 rounded-2xl p-4 space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-900">
+        <div className={`border rounded-2xl p-4 space-y-4 ${
+          isDark ? "bg-slate-950/40 border-slate-800/80" : "bg-slate-50 border-slate-200"
+        }`}>
+          <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b ${
+            isDark ? "border-slate-900" : "border-slate-200"
+          }`}>
             <div className="space-y-0.5">
               <div className="flex items-center gap-1.5">
                 <Grid3X3 className="w-4 h-4 text-rose-500 animate-pulse" />
-                <h4 className="text-xs font-sans font-extrabold text-slate-200">
+                <h4 className={`text-xs font-sans font-extrabold ${isDark ? "text-slate-200" : "text-slate-900"}`}>
                   Equatorial Sea Surface Temperature (SST) Heatmap Matrix
                 </h4>
               </div>
               <p className="text-[10px] text-slate-500 font-mono leading-relaxed">
-                A regional Hovmöller comparison mapping local anomaly stress across major historical ENSO events.
+                A regional Hovmöller comparison mapping peak-year local anomaly stress across major historical ENSO events.
               </p>
             </div>
 
             <div className="flex items-center gap-2.5 text-[10px] font-mono">
               <span className="text-slate-500">Scale:</span>
-              <div className="flex items-center gap-1 bg-slate-950 px-2 py-1 border border-slate-900 rounded-lg">
+              <div className={`flex items-center gap-1 px-2 py-1 border rounded-lg ${
+                isDark ? "bg-slate-950 border-slate-800" : "bg-white border-slate-200"
+              }`}>
                 <span className="w-2.5 h-2.5 bg-blue-600 rounded" />
                 <span className="text-[9px] text-slate-400">La Niña</span>
-                <span className="w-2.5 h-2.5 bg-slate-800 rounded ml-2" />
+                <span className={`w-2.5 h-2.5 rounded ml-2 ${isDark ? "bg-slate-800" : "bg-slate-300"}`} />
                 <span className="text-[9px] text-slate-400">Neutral</span>
                 <span className="w-2.5 h-2.5 bg-rose-600 rounded ml-2" />
                 <span className="text-[9px] text-slate-400">El Niño</span>
@@ -624,14 +694,24 @@ export default function DashboardCharts({
                 <div className="text-left font-sans text-[10px] uppercase tracking-wider text-slate-500 pl-1 col-span-2">
                   Monitored Region
                 </div>
-                {heatmapYears.map((yr) => (
-                  <div key={`yr-h-${yr}`} className="bg-slate-950/60 py-1 rounded border border-slate-900 hover:text-white cursor-pointer" title="SST index year" onClick={() => {
-                    const match = historicalRecords.find(r => r.year === yr);
-                    if (match) onSelectOni(match.oni);
-                  }}>
-                    {yr}
-                  </div>
-                ))}
+                {heatmapYears.map((yr) => {
+                  const peakOni = yearlyPeakOniMap[yr] ?? 0.0;
+                  return (
+                    <button
+                      type="button"
+                      key={`yr-h-${yr}`}
+                      className={`py-1 rounded border cursor-pointer transition-colors ${
+                        isDark
+                          ? "bg-slate-950/60 border-slate-800 text-slate-300 hover:text-white hover:border-cyan-500/50"
+                          : "bg-white border-slate-300 text-slate-700 hover:text-slate-950 hover:border-cyan-600"
+                      }`}
+                      title={`Jump to ${yr} Peak ONI (${peakOni >= 0 ? "+" : ""}${peakOni.toFixed(1)}°C)`}
+                      onClick={() => onSelectOni(peakOni)}
+                    >
+                      {yr}
+                    </button>
+                  );
+                })}
               </div>
 
               {/* Heatmap Rows (Regions) */}
@@ -639,29 +719,27 @@ export default function DashboardCharts({
                 return (
                   <div key={`row-h-${row.id}`} className="grid grid-cols-12 gap-1 items-center">
                     {/* Region Label */}
-                    <div className="text-slate-300 font-sans font-bold text-[10px] leading-tight col-span-2 pr-1.5 truncate">
+                    <div className={`font-sans font-bold text-[10px] leading-tight col-span-2 pr-1.5 truncate ${
+                      isDark ? "text-slate-300" : "text-slate-800"
+                    }`}>
                       {row.name}
                     </div>
 
                     {/* Heatmap Cells */}
                     {heatmapYears.map((yr) => {
-                      const record = historicalRecords.find(r => r.year === yr);
-                      const baseOni = record ? record.oni : 0.0;
+                      const baseOni = yearlyPeakOniMap[yr] ?? 0.0;
                       const calculatedAnom = Math.round((row.coef * baseOni) * 100) / 100;
 
                       return (
-                        <div
+                        <button
+                          type="button"
                           key={`cell-${row.id}-${yr}`}
-                          onClick={() => {
-                            if (record) {
-                              onSelectOni(record.oni);
-                            }
-                          }}
+                          onClick={() => onSelectOni(baseOni)}
                           className={`py-2 rounded-lg border text-center font-mono text-[9px] font-bold transition-all duration-200 cursor-pointer ${getHeatmapColor(calculatedAnom)}`}
-                          title={`${row.name} (${yr}) Anomaly: ${calculatedAnom >= 0 ? "+" : ""}${calculatedAnom}°C`}
+                          title={`${row.name} (${yr} Peak ONI ${baseOni >= 0 ? "+" : ""}${baseOni.toFixed(1)}°C) → Anomaly: ${calculatedAnom >= 0 ? "+" : ""}${calculatedAnom}°C`}
                         >
                           {calculatedAnom >= 0 ? "+" : ""}{calculatedAnom.toFixed(1)}
-                        </div>
+                        </button>
                       );
                     })}
                   </div>
@@ -671,10 +749,12 @@ export default function DashboardCharts({
           </div>
 
           {/* Interactive Legend description */}
-          <div className="flex items-center gap-1.5 text-[9px] text-slate-500 font-mono mt-1.5 bg-slate-950/40 p-2.5 rounded-xl border border-slate-900">
+          <div className={`flex items-center gap-1.5 text-[9px] text-slate-500 font-mono mt-1.5 p-2.5 rounded-xl border ${
+            isDark ? "bg-slate-950/40 border-slate-900" : "bg-white border-slate-200"
+          }`}>
             <Info className="w-3.5 h-3.5 text-cyan-400 flex-shrink-0" />
             <span>
-              <strong>GIS Tip:</strong> Click any year header or grid cell on the SST Heatmap to jump the active dashboard simulation to that historical period's specific Equatorial forcing index.
+              <strong>GIS Tip:</strong> Click any year header or grid cell on the SST Heatmap to jump the active dashboard simulation to that historical period&apos;s peak Equatorial forcing index.
             </span>
           </div>
         </div>
@@ -682,23 +762,34 @@ export default function DashboardCharts({
 
       {/* DATASET COVERAGE PORT */}
       {activeTab === "coverage" && (
-        <div className="bg-slate-950/40 border border-slate-850/60 rounded-2xl p-5 space-y-4">
-          <div className="space-y-0.5 border-b border-slate-900 pb-3">
-            <span className="text-[9px] uppercase font-mono text-cyan-400 font-bold block">
-              Module 1 Dataset Integrity Matrix
+        <div className={`border rounded-2xl p-5 space-y-4 ${
+          isDark ? "bg-slate-950/40 border-slate-800/80" : "bg-slate-50 border-slate-200"
+        }`}>
+          <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b pb-3 ${
+            isDark ? "border-slate-900" : "border-slate-200"
+          }`}>
+            <div className="space-y-0.5">
+              <span className="text-[9px] uppercase font-mono text-cyan-400 font-bold block">
+                Module 1 Dataset Integrity Matrix
+              </span>
+              <h4 className={`text-xs font-sans font-extrabold ${isDark ? "text-slate-200" : "text-slate-900"}`}>
+                Dataset Temporal Coverage &amp; Data Quality Heatmap
+              </h4>
+              <p className="text-[10px] text-slate-500 font-mono">
+                Visualizes data reporting coverage across NOAA ONI, Copernicus ERA5, and simulated Regional Climate Impact datasets.
+              </p>
+            </div>
+            <span className={`text-[10px] font-mono px-2.5 py-1 rounded-xl border shrink-0 self-start sm:self-center ${
+              isDark ? "bg-slate-950 border-slate-800 text-cyan-400" : "bg-white border-slate-300 text-cyan-700"
+            }`}>
+              {historicalRecords.length} active monthly records
             </span>
-            <h4 className="text-xs font-sans font-extrabold text-slate-200">
-              Dataset Temporal Coverage & Data Quality Heatmap
-            </h4>
-            <p className="text-[10px] text-slate-500 font-mono">
-              Visualizes data reporting coverage across NOAA ONI, Copernicus ERA5, and simulated Regional Climate Impact datasets.
-            </p>
           </div>
 
           <div className="overflow-x-auto scrollbar-thin">
             <table className="w-full text-left border-collapse text-[10px] font-mono">
               <thead>
-                <tr className="border-b border-slate-850 text-slate-500 select-none">
+                <tr className={`border-b text-slate-500 select-none ${isDark ? "border-slate-800" : "border-slate-200"}`}>
                   <th className="py-2 pr-3 text-left font-sans text-xs">Climate Feed Dataset Source</th>
                   <th className="py-2 text-center w-24">1950 - 1959</th>
                   <th className="py-2 text-center w-24">1960 - 1979</th>
@@ -707,9 +798,9 @@ export default function DashboardCharts({
                   <th className="py-2 text-center w-24">2015 - 2026</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-850/40">
+              <tbody className={`divide-y ${isDark ? "divide-slate-800/60" : "divide-slate-200"}`}>
                 <tr>
-                  <td className="py-3 font-sans text-[11px] font-semibold text-slate-200">
+                  <td className={`py-3 font-sans text-[11px] font-semibold ${isDark ? "text-slate-200" : "text-slate-800"}`}>
                     NOAA Oceanic Niño Index (CPC Feed)
                   </td>
                   <td className="py-3 text-center">
@@ -729,7 +820,7 @@ export default function DashboardCharts({
                   </td>
                 </tr>
                 <tr>
-                  <td className="py-3 font-sans text-[11px] font-semibold text-slate-200">
+                  <td className={`py-3 font-sans text-[11px] font-semibold ${isDark ? "text-slate-200" : "text-slate-800"}`}>
                     ECMWF Copernicus ERA5 Reanalysis
                   </td>
                   <td className="py-3 text-center">
@@ -749,7 +840,7 @@ export default function DashboardCharts({
                   </td>
                 </tr>
                 <tr>
-                  <td className="py-3 font-sans text-[11px] font-semibold text-slate-200">
+                  <td className={`py-3 font-sans text-[11px] font-semibold ${isDark ? "text-slate-200" : "text-slate-800"}`}>
                     Regional Simulated Climate Impact Logs
                   </td>
                   <td className="py-3 text-center">
@@ -772,10 +863,12 @@ export default function DashboardCharts({
             </table>
           </div>
 
-          <div className="flex items-center gap-1.5 text-[9px] text-slate-500 font-mono pt-2 border-t border-slate-900">
-            <span className="w-2.5 h-2.5 bg-emerald-500 rounded animate-pulse" /> <span>Full Coverage (Observed)</span>
-            <span className="w-2.5 h-2.5 bg-amber-500 rounded ml-3" /> <span>Partial Coverage (Statistical Reconstructed)</span>
-            <span className="w-2.5 h-2.5 bg-rose-500 rounded ml-3" /> <span>Model Mode (Climatology Simulated)</span>
+          <div className={`flex flex-wrap items-center gap-y-2 gap-x-3 text-[9px] text-slate-500 font-mono pt-2 border-t ${
+            isDark ? "border-slate-900" : "border-slate-200"
+          }`}>
+            <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 bg-emerald-500 rounded animate-pulse" /> Full Coverage (Observed)</span>
+            <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 bg-amber-500 rounded" /> Partial Coverage (Statistical Reconstructed)</span>
+            <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 bg-rose-500 rounded" /> Model Mode (Climatology Simulated)</span>
           </div>
         </div>
       )}

@@ -251,7 +251,7 @@ export default function App() {
                 <Globe className="w-5.5 h-5.5 text-slate-950 animate-spin-slow" />
               </div>
               <div>
-                <h1 className="text-sm font-bold tracking-tight uppercase leading-none font-sans text-white">
+                <h1 className={`text-sm font-bold tracking-tight uppercase leading-none font-sans ${isDark ? "text-white" : "text-slate-900"}`}>
                   ENSO Climate<br/>
                   <span className="text-cyan-400 font-mono text-xs">Intelligence</span>
                 </h1>
@@ -287,7 +287,7 @@ export default function App() {
                     <Icon className="w-4 h-4 flex-shrink-0" />
                     <div>
                       <div className="text-xs leading-none">{m.label}</div>
-                      <div className={`text-[9px] mt-0.5 font-normal truncate max-w-[170px] ${activeTab === m.id ? "text-slate-900/70" : "text-slate-500Group-hover:text-slate-400"}`}>{m.desc}</div>
+                      <div className={`text-[9px] mt-0.5 font-normal truncate max-w-[170px] ${activeTab === m.id ? "text-slate-900/70" : "text-slate-500 group-hover:text-slate-400"}`}>{m.desc}</div>
                     </div>
                   </button>
                 );
@@ -298,10 +298,10 @@ export default function App() {
           {/* Connected workstation footer */}
           <div className="pt-4 border-t border-slate-800/30 space-y-2.5 text-[10px] font-mono leading-relaxed text-slate-500">
             {currentUser && (
-              <div className="flex items-center gap-2 bg-[#050917]/50 border border-slate-850 p-2 rounded-xl">
+              <div className={`flex items-center gap-2 border p-2 rounded-xl ${isDark ? "bg-[#050917]/50 border-slate-800" : "bg-slate-100 border-slate-200"}`}>
                 <Unlock className="w-3.5 h-3.5 text-cyan-400" />
                 <div className="truncate">
-                  <span className="font-sans font-bold text-slate-300 block leading-tight truncate">{currentUser.name}</span>
+                  <span className={`font-sans font-bold block leading-tight truncate ${isDark ? "text-slate-300" : "text-slate-800"}`}>{currentUser.name}</span>
                   <span className="text-[9px] uppercase font-bold text-slate-500">{currentUser.role} PRIVILEGES</span>
                 </div>
               </div>
@@ -320,9 +320,11 @@ export default function App() {
           <header id="top-portal-header" className={`border-b px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4 transition-colors duration-300 ${
             isDark ? "bg-[#080d1e] border-slate-900 text-slate-200" : "bg-white border-slate-200"
           }`}>
-            <div className="flex items-center gap-2 bg-[#020617]/40 border border-slate-850/80 px-3 py-1.5 rounded-full text-xs font-mono text-cyan-400">
+            <div className={`flex items-center gap-2 border px-3 py-1.5 rounded-full text-xs font-mono text-cyan-400 ${
+              isDark ? "bg-[#020617]/40 border-slate-800" : "bg-slate-100 border-slate-300"
+            }`}>
               <Clock className="w-3.5 h-3.5" />
-              <span>Diagnostic Cycle: <span className="font-bold text-white uppercase font-sans">Active (1980 - 2026 Grid)</span></span>
+              <span>Diagnostic Cycle: <span className={`font-bold uppercase font-sans ${isDark ? "text-white" : "text-slate-900"}`}>Active (1980 - 2026 Grid)</span></span>
             </div>
 
             <div className="flex items-center gap-3">
@@ -337,14 +339,16 @@ export default function App() {
                 {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
               </button>
 
-              <div className="h-5 w-px bg-slate-800" />
+              <div className="h-5 w-px bg-slate-800/30" />
 
               {/* Advanced Filters Overlay Quick dropdowns */}
               <div className="relative">
                 <select
                   value={filterRegionBound}
                   onChange={(e) => setFilterRegionBound(e.target.value)}
-                  className="bg-slate-950 border border-slate-850 text-[11px] font-mono font-bold text-white px-2.5 py-1.5 rounded-xl focus:outline-none"
+                  className={`border text-[11px] font-mono font-bold px-2.5 py-1.5 rounded-xl focus:outline-none ${
+                    isDark ? "bg-slate-950 border-slate-800 text-white" : "bg-white border-slate-300 text-slate-900"
+                  }`}
                 >
                   <option value="all">Sectors: All Mapped</option>
                   <option value="se_asia">SE Asia & Monsoons</option>
@@ -354,7 +358,7 @@ export default function App() {
                 </select>
               </div>
 
-              <div className="h-5 w-px bg-slate-800" />
+              <div className="h-5 w-px bg-slate-800/30" />
 
               {/* Live Status Notifications Dropdown */}
               <div className="relative">
@@ -372,7 +376,7 @@ export default function App() {
                 </button>
 
                 {isNotificationsOpen && (
-                  <div className="absolute right-0 mt-2.5 w-80 bg-slate-950 border border-slate-850 rounded-2xl p-4 shadow-xl z-50 text-xs font-mono space-y-3.5">
+                  <div className="absolute right-0 mt-2.5 w-80 bg-slate-950 border border-slate-800 rounded-2xl p-4 shadow-xl z-50 text-xs font-mono space-y-3.5">
                     <div className="flex justify-between items-center border-b border-slate-900 pb-2">
                       <span className="font-bold text-slate-200">ALERT VERIFICATION LIST</span>
                       <button onClick={() => setIsNotificationsOpen(false)}>
@@ -408,39 +412,39 @@ export default function App() {
               <div className="space-y-6">
                 {/* OVERVIEW CARDS GRID (6 Cards as specified) */}
                 <div id="stats-dashboard-chassis" className="grid grid-cols-2 lg:grid-cols-6 gap-3.5">
-                  <div className={`p-4 rounded-2xl border flex flex-col justify-between transition-all duration-300 ${isDark ? "bg-[#0b1021] border-slate-850 shadow-md" : "bg-white border-slate-200 shadow-sm"}`}>
+                  <div className={`p-4 rounded-2xl border flex flex-col justify-between transition-all duration-300 ${isDark ? "bg-[#0b1021] border-slate-800 shadow-md" : "bg-white border-slate-200 shadow-sm"}`}>
                     <span className="text-[10px] text-zinc-500 uppercase tracking-widest block font-mono font-bold">Total records</span>
-                    <span className="text-lg font-bold text-white tracking-tight mt-1block">{totalRecordsCount} Mapped</span>
+                    <span className={`text-lg font-bold tracking-tight mt-1 block ${isDark ? "text-white" : "text-slate-900"}`}>{totalRecordsCount} Mapped</span>
                     <span className="text-[9px] text-cyan-400 font-mono mt-2 block">NOAA-BOM Continuous</span>
                   </div>
 
-                  <div className={`p-4 rounded-2xl border flex flex-col justify-between transition-all duration-300 ${isDark ? "bg-[#0b1021] border-slate-850 shadow-md" : "bg-white border-slate-200 shadow-sm"}`}>
+                  <div className={`p-4 rounded-2xl border flex flex-col justify-between transition-all duration-300 ${isDark ? "bg-[#0b1021] border-slate-800 shadow-md" : "bg-white border-slate-200 shadow-sm"}`}>
                     <span className="text-[10px] text-zinc-500 uppercase tracking-widest block font-mono font-bold">El Niño Epochs</span>
                     <span className="text-lg font-bold text-pink-500 tracking-tight mt-1 block font-mono">9 events</span>
                     <span className="text-[9px] text-zinc-500 font-mono mt-2 block">ONI anomaly &gt;= 1.5°C</span>
                   </div>
 
-                  <div className={`p-4 rounded-2xl border flex flex-col justify-between transition-all duration-300 ${isDark ? "bg-[#0b1021] border-slate-850 shadow-md" : "bg-white border-slate-200 shadow-sm"}`}>
+                  <div className={`p-4 rounded-2xl border flex flex-col justify-between transition-all duration-300 ${isDark ? "bg-[#0b1021] border-slate-800 shadow-md" : "bg-white border-slate-200 shadow-sm"}`}>
                     <span className="text-[10px] text-zinc-500 uppercase tracking-widest block font-mono font-bold">Regions Analyzed</span>
-                    <span className="text-lg font-bold text-white tracking-tight mt-1 block">8 core scales</span>
+                    <span className={`text-lg font-bold tracking-tight mt-1 block ${isDark ? "text-white" : "text-slate-900"}`}>{filteredRegions.length} core scales</span>
                     <span className="text-[9px] text-cyan-400 font-mono mt-2 block">Ocean-Atmospheric grids</span>
                   </div>
 
-                  <div className={`p-4 rounded-2xl border flex flex-col justify-between transition-all duration-300 ${isDark ? "bg-[#0b1021] border-slate-850 shadow-md" : "bg-white border-slate-200 shadow-sm"}`}>
+                  <div className={`p-4 rounded-2xl border flex flex-col justify-between transition-all duration-300 ${isDark ? "bg-[#0b1021] border-slate-800 shadow-md" : "bg-white border-slate-200 shadow-sm"}`}>
                     <span className="text-[10px] text-zinc-500 uppercase tracking-widest block font-mono font-bold">Average Temp</span>
                     <span className="text-lg font-bold text-rose-500 mt-1 block">+{computedMeanAnomalistTemp}°C</span>
                     <span className="text-[9px] text-zinc-500 font-mono mt-2 block">Mean anomaly deviations</span>
                   </div>
 
-                  <div className={`p-4 rounded-2xl border flex flex-col justify-between transition-all duration-300 ${isDark ? "bg-[#0b1021] border-slate-850 shadow-md" : "bg-white border-slate-200 shadow-sm"}`}>
+                  <div className={`p-4 rounded-2xl border flex flex-col justify-between transition-all duration-300 ${isDark ? "bg-[#0b1021] border-slate-800 shadow-md" : "bg-white border-slate-200 shadow-sm"}`}>
                     <span className="text-[10px] text-zinc-500 uppercase tracking-widest block font-mono font-bold">Average Rain</span>
                     <span className="text-lg font-bold text-sky-400 mt-1 block">{computedMeanRainShift}% shift</span>
                     <span className="text-[9px] text-cyan-400 font-mono mt-2 block">Pluvial moisture budget</span>
                   </div>
 
-                  <div className={`p-4 rounded-2xl border flex flex-col justify-between transition-all duration-300 ${isDark ? "bg-[#0b1021] border-slate-850 shadow-md" : "bg-white border-slate-200 shadow-sm"}`}>
+                  <div className={`p-4 rounded-2xl border flex flex-col justify-between transition-all duration-300 ${isDark ? "bg-[#0b1021] border-slate-800 shadow-md" : "bg-white border-slate-200 shadow-sm"}`}>
                     <span className="text-[10px] text-zinc-500 uppercase tracking-widest block font-mono font-bold">Active Dataset</span>
-                    <span className="text-[11px] font-bold text-zinc-200 leading-tight block mt-1">ECMWF ERA5 + NOAA Grids</span>
+                    <span className={`text-[11px] font-bold leading-tight block mt-1 ${isDark ? "text-zinc-200" : "text-slate-800"}`}>ECMWF ERA5 + NOAA Grids</span>
                     <span className="text-[9px] text-cyan-400 font-mono mt-2 block truncate">Custom: {customDatasetsAdded.length} integrated</span>
                   </div>
                 </div>
