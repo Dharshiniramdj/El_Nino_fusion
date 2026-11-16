@@ -49,6 +49,15 @@ export default function DashboardCharts({
 }: DashboardChartsProps) {
   const [yearRange, setYearRange] = useState<"all" | "modern" | "2010" | "2015">("2010");
   const [activeTab, setActiveTab] = useState<"charts" | "multiline" | "heatmap" | "coverage">("charts");
+  const [hiddenSeries, setHiddenSeries] = useState<Record<"oni" | "tempAnomaly" | "rainfallAnomaly", boolean>>({
+    oni: false,
+    tempAnomaly: false,
+    rainfallAnomaly: false
+  });
+
+  const toggleSeries = (key: "oni" | "tempAnomaly" | "rainfallAnomaly") => {
+    setHiddenSeries((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
 
   // 1. Group and average the monthly data by year for the Line Chart
   const yearlyData = useMemo(() => {
@@ -345,7 +354,7 @@ export default function DashboardCharts({
                     fontSize={9} 
                     fontFamily="JetBrains Mono"
                     tickLine={false}
-                    formatter={(val) => `${val}%`}
+                    tickFormatter={(val) => `${val}%`}
                   />
                   <Tooltip 
                     contentStyle={{ 
@@ -383,13 +392,17 @@ export default function DashboardCharts({
 
       {/* CLIMATE FUSION MULTI-LINE ANALYSIS PORT */}
       {activeTab === "multiline" && (
-        <div className="bg-slate-950/40 border border-slate-850/60 rounded-2xl p-5 space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-900">
+        <div className={`border rounded-2xl p-5 space-y-4 ${
+          isDark ? "bg-slate-950/40 border-slate-800/80" : "bg-slate-50 border-slate-200"
+        }`}>
+          <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b ${
+            isDark ? "border-slate-900" : "border-slate-200"
+          }`}>
             <div className="space-y-0.5">
               <span className="text-[9px] uppercase font-mono text-cyan-400 font-bold block">
                 Module 1 Capstone Plot
               </span>
-              <h4 className="text-xs font-sans font-extrabold text-slate-200">
+              <h4 className={`text-xs font-sans font-extrabold ${isDark ? "text-slate-200" : "text-slate-900"}`}>
                 Interactive Multi-Line Time Series Comparison
               </h4>
               <p className="text-[10px] text-slate-500 font-mono">
@@ -399,8 +412,12 @@ export default function DashboardCharts({
             
             <select
               value={yearRange}
-              onChange={(e: any) => setYearRange(e.target.value)}
-              className="bg-slate-950 border border-slate-850 text-[10px] font-mono text-slate-350 px-2.5 py-1 rounded-xl focus:outline-none"
+              onChange={(e) => setYearRange(e.target.value as "all" | "modern" | "2010" | "2015")}
+              className={`border text-[10px] font-mono px-2.5 py-1.5 rounded-xl focus:outline-none cursor-pointer ${
+                isDark
+                  ? "bg-slate-950 border-slate-800 text-slate-200"
+                  : "bg-white border-slate-300 text-slate-800"
+              }`}
             >
               <option value="2015">2015 - 2026</option>
               <option value="2010">2010 - 2026</option>
@@ -409,30 +426,162 @@ export default function DashboardCharts({
             </select>
           </div>
 
-          <div className="h-64 w-full bg-slate-950 rounded-2xl border border-slate-900/60 p-4">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={multiLineData} margin={{ top: 10, right: 15, left: -25, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" opacity={0.3} />
-                <XAxis dataKey="year" stroke="#475569" fontSize={9} fontFamily="JetBrains Mono" />
-                <YAxis stroke="#ef4444" fontSize={9} fontFamily="JetBrains Mono" />
-                <YAxis yAxisId="right" orientation="right" stroke="#f59e0b" fontSize={9} fontFamily="JetBrains Mono" />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: "#020617", borderColor: "#1e293b", fontSize: "10px", fontFamily: "JetBrains Mono" }}
-                  formatter={(value: any, name: any) => [
-                    name === "Rainfall Anomaly (%)" ? `${value}%` : `${value}°C`,
-                    name
-                  ]}
-                />
-                <Legend verticalAlign="top" height={28} wrapperStyle={{ fontSize: "9px" }} />
-                <Line type="monotone" dataKey="oni" stroke="#ef4444" strokeWidth={2.5} name="Oceanic Niño Index (ONI)" dot={{ r: 3 }} activeDot={{ r: 5 }} />
-                <Line type="monotone" dataKey="tempAnomaly" stroke="#22d3ee" strokeWidth={2.5} name="Temperature Anomaly (°C)" dot={{ r: 3 }} activeDot={{ r: 5 }} />
-                <Line yAxisId="right" type="monotone" dataKey="rainfallAnomaly" stroke="#f59e0b" strokeWidth={2.5} name="Rainfall Anomaly (%)" dot={{ r: 3 }} activeDot={{ r: 5 }} />
-              </LineChart>
-            </ResponsiveContainer>
+          {/* Interactive Series Visibility Toggles */}
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              {[
+                { key: "oni" as const, label: "Oceanic Niño Index (ONI)", color: "#ef4444" },
+                { key: "tempAnomaly" as const, label: "Temperature Anomaly (°C)", color: "#22d3ee" },
+                { key: "rainfallAnomaly" as const, label: "Rainfall Anomaly (%)", color: "#f59e0b" }
+              ].map((series) => {
+                const isHidden = hiddenSeries[series.key];
+                return (
+                  <button
+                    key={series.key}
+                    type="button"
+                    onClick={() => toggleSeries(series.key)}
+                    className={`px-2.5 py-1 rounded-lg border text-[10px] font-mono font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+                      isHidden
+                        ? isDark
+                          ? "bg-slate-950/50 border-slate-800 text-slate-500 opacity-60"
+                          : "bg-slate-100 border-slate-300 text-slate-400 opacity-60"
+                        : isDark
+                          ? "bg-slate-900 border-slate-700 text-slate-100 shadow-sm"
+                          : "bg-white border-slate-300 text-slate-800 shadow-sm"
+                    }`}
+                    title={`Click to ${isHidden ? "show" : "hide"} ${series.label}`}
+                  >
+                    <span
+                      className="w-2.5 h-2.5 rounded-full shrink-0"
+                      style={{ backgroundColor: isHidden ? "#64748b" : series.color }}
+                    />
+                    <span className={isHidden ? "line-through" : ""}>{series.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <span className="text-[9px] font-mono text-slate-500">
+              Click series to toggle • Click a year point to sync ONI
+            </span>
+          </div>
+
+          <div className={`w-full rounded-2xl border p-4 ${
+            isDark ? "bg-slate-950 border-slate-900/80" : "bg-white border-slate-200"
+          }`}>
+            {multiLineData.length === 0 ? (
+              <div className="h-[270px] flex items-center justify-center text-xs font-mono text-slate-500">
+                Loading coupled climate time-series records...
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={270}>
+                <LineChart
+                  data={multiLineData}
+                  margin={{ top: 10, right: 12, left: 0, bottom: 4 }}
+                  onClick={(state: any) => {
+                    const idx = state?.activeTooltipIndex;
+                    if (typeof idx === "number" && multiLineData[idx]) {
+                      onSelectOni(multiLineData[idx].oni);
+                    }
+                  }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#1e293b" : "#cbd5e1"} opacity={0.35} />
+                  <XAxis
+                    dataKey="year"
+                    stroke="#64748b"
+                    fontSize={10}
+                    fontFamily="JetBrains Mono"
+                    tickLine={false}
+                  />
+                  <YAxis
+                    yAxisId="left"
+                    width={42}
+                    stroke="#ef4444"
+                    fontSize={10}
+                    fontFamily="JetBrains Mono"
+                    tickLine={false}
+                    domain={["auto", "auto"]}
+                    tickFormatter={(val) => `${val}°C`}
+                  />
+                  <YAxis
+                    yAxisId="right"
+                    orientation="right"
+                    width={42}
+                    stroke="#f59e0b"
+                    fontSize={10}
+                    fontFamily="JetBrains Mono"
+                    tickLine={false}
+                    domain={["auto", "auto"]}
+                    tickFormatter={(val) => `${val}%`}
+                  />
+                  <ReferenceLine yAxisId="left" y={0} stroke="#475569" strokeDasharray="3 3" opacity={0.6} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: isDark ? "#020617" : "#ffffff",
+                      borderColor: isDark ? "#1e293b" : "#cbd5e1",
+                      borderRadius: "12px",
+                      fontSize: "10px",
+                      fontFamily: "JetBrains Mono",
+                      color: isDark ? "#f8fafc" : "#0f172a"
+                    }}
+                    formatter={(value: any, name: any) => [
+                      name === "Rainfall Anomaly (%)" ? `${value > 0 ? "+" : ""}${value}%` : `${value > 0 ? "+" : ""}${value}°C`,
+                      name
+                    ]}
+                  />
+                  <Legend
+                    verticalAlign="top"
+                    height={28}
+                    wrapperStyle={{ fontSize: "10px", cursor: "pointer" }}
+                    onClick={(entry: any) => {
+                      const key = entry?.dataKey;
+                      if (key === "oni" || key === "tempAnomaly" || key === "rainfallAnomaly") {
+                        toggleSeries(key);
+                      }
+                    }}
+                  />
+                  <Line
+                    yAxisId="left"
+                    type="monotone"
+                    dataKey="oni"
+                    stroke="#ef4444"
+                    strokeWidth={2.5}
+                    name="Oceanic Niño Index (ONI)"
+                    hide={hiddenSeries.oni}
+                    dot={{ r: 3, fill: "#ef4444" }}
+                    activeDot={{ r: 5 }}
+                    isAnimationActive={false}
+                  />
+                  <Line
+                    yAxisId="left"
+                    type="monotone"
+                    dataKey="tempAnomaly"
+                    stroke="#22d3ee"
+                    strokeWidth={2.5}
+                    name="Temperature Anomaly (°C)"
+                    hide={hiddenSeries.tempAnomaly}
+                    dot={{ r: 3, fill: "#22d3ee" }}
+                    activeDot={{ r: 5 }}
+                    isAnimationActive={false}
+                  />
+                  <Line
+                    yAxisId="right"
+                    type="monotone"
+                    dataKey="rainfallAnomaly"
+                    stroke="#f59e0b"
+                    strokeWidth={2.5}
+                    name="Rainfall Anomaly (%)"
+                    hide={hiddenSeries.rainfallAnomaly}
+                    dot={{ r: 3, fill: "#f59e0b" }}
+                    activeDot={{ r: 5 }}
+                    isAnimationActive={false}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            )}
           </div>
           <div className="flex items-center gap-1.5 text-[9px] text-slate-500 font-mono">
-            <Info className="w-3.5 h-3.5 text-cyan-400" />
-            <span>Dual-axis plot maps standard atmosphere deviations (left axis) against percentage monsoonal shifts (right axis).</span>
+            <Info className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+            <span>Dual-axis plot maps standard atmosphere deviations (left axis, °C) against percentage monsoonal shifts (right axis, %).</span>
           </div>
         </div>
       )}

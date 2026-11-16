@@ -431,19 +431,27 @@ Formulate an insightful response answering their direct question, backing your p
   }
 
   try {
-    const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
-      contents: prompt,
-      config: {
-        systemInstruction,
-        temperature: 0.25,
-      }
-    });
+    const timeoutMs = 15000;
+    const response = await Promise.race([
+      ai.models.generateContent({
+        model: "gemini-3.5-flash",
+        contents: prompt,
+        config: {
+          systemInstruction,
+          temperature: 0.25,
+        }
+      }),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("Gemini API request timed out")), timeoutMs)
+      )
+    ]);
+
+    const responseText = response.text || "Diagnostic brief unavailable for this configuration.";
 
     // Save successful responses to cache
-    intelligenceCache[cacheKey] = response.text;
+    intelligenceCache[cacheKey] = responseText;
 
-    res.json({ responseText: response.text });
+    res.json({ responseText });
   } catch (error: any) {
     console.warn("Gemini climate query failed (falling back gracefully):", error);
     

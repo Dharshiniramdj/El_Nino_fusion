@@ -894,205 +894,10 @@ export default function ClimateMap({
               </div>
             )}
 
-            {/* FLOATING GEOSPATIAL MAP CONTROL CENTER (Top-Right overlay) */}
-            <div id="geospatial-layer-controller" className="absolute top-4 right-4 z-30 bg-[#040815]/95 border border-slate-800 p-3.5 rounded-2xl shadow-2xl backdrop-blur-sm select-none text-slate-200 transition-all duration-300 w-56 md:w-64">
-              <div className="flex items-center justify-between pb-2 mb-2.5 border-b border-slate-800/80">
-                <div className="flex items-center gap-2">
-                  <span className="p-1 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-                    <Layers className="w-3.5 h-3.5" />
-                  </span>
-                  <span className="font-bold text-slate-100 text-[10px] uppercase tracking-wider">Geospatial Controls</span>
-                </div>
-                <button 
-                  onClick={() => setIsControlsExpanded(!isControlsExpanded)}
-                  className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
-                  title={isControlsExpanded ? "Collapse Controls" : "Expand Controls"}
-                >
-                  <span className="text-xs">{isControlsExpanded ? "▲" : "▼"}</span>
-                </button>
-              </div>
-
-              {isControlsExpanded ? (
-                <div className="space-y-3.5 animate-fade-in">
-                  
-                  {/* CONTEXTUAL LAYER TOGGLES */}
-                  <div className="space-y-2">
-                    <span className="text-[9px] font-mono uppercase text-slate-500 font-bold tracking-widest block">Contextual Overlays</span>
-                    
-                    {/* 1. Ocean Currents Toggle */}
-                    <label className="flex items-center justify-between p-2 rounded-xl bg-slate-900/50 border border-slate-850 hover:bg-slate-900/80 hover:border-slate-800 transition-all cursor-pointer">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm">🌊</span>
-                        <div>
-                          <span className="text-[10px] font-semibold text-slate-200 block leading-tight">Ocean Currents</span>
-                          <span className="text-[8px] text-slate-500 block leading-none mt-0.5">Equatorial stream flows</span>
-                        </div>
-                      </div>
-                      <input
-                        type="checkbox"
-                        checked={showOceanCurrents}
-                        onChange={(e) => setShowOceanCurrents(e.target.checked)}
-                        className="w-3.5 h-3.5 rounded border-slate-700 bg-slate-850 text-cyan-400 focus:ring-0 focus:ring-offset-0 accent-cyan-400 cursor-pointer"
-                      />
-                    </label>
-
-                    {/* 2. Atmospheric Pressure Toggle */}
-                    <label className="flex items-center justify-between p-2 rounded-xl bg-slate-900/50 border border-slate-850 hover:bg-slate-900/80 hover:border-slate-800 transition-all cursor-pointer">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm">🌀</span>
-                        <div>
-                          <span className="text-[10px] font-semibold text-slate-200 block leading-tight">Walker Pressure (H/L)</span>
-                          <span className="text-[8px] text-slate-500 block leading-none mt-0.5">Pacific isobar nodes</span>
-                        </div>
-                      </div>
-                      <input
-                        type="checkbox"
-                        checked={showAtmosphericPressure}
-                        onChange={(e) => setShowAtmosphericPressure(e.target.checked)}
-                        className="w-3.5 h-3.5 rounded border-slate-700 bg-slate-850 text-cyan-400 focus:ring-0 focus:ring-offset-0 accent-cyan-400 cursor-pointer"
-                      />
-                    </label>
-
-                    {/* 3. Cloud Cover Toggle */}
-                    <label className="flex items-center justify-between p-2 rounded-xl bg-slate-900/50 border border-slate-850 hover:bg-slate-900/80 hover:border-slate-800 transition-all cursor-pointer">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm">☁️</span>
-                        <div>
-                          <span className="text-[10px] font-semibold text-slate-200 block leading-tight">Convective Clouds</span>
-                          <span className="text-[8px] text-slate-500 block leading-none mt-0.5">Dynamic tropical drift</span>
-                        </div>
-                      </div>
-                      <input
-                        type="checkbox"
-                        checked={showCloudCover}
-                        onChange={(e) => setShowCloudCover(e.target.checked)}
-                        className="w-3.5 h-3.5 rounded border-slate-700 bg-slate-850 text-cyan-400 focus:ring-0 focus:ring-offset-0 accent-cyan-400 cursor-pointer"
-                      />
-                    </label>
-
-                    {/* 4. Coordinate Grid Toggle */}
-                    <label className="flex items-center justify-between p-2 rounded-xl bg-slate-900/50 border border-slate-850 hover:bg-slate-900/80 hover:border-slate-800 transition-all cursor-pointer">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm">🌐</span>
-                        <div>
-                          <span className="text-[10px] font-semibold text-slate-200 block leading-tight">Coordinate Grid</span>
-                          <span className="text-[8px] text-slate-500 block leading-none mt-0.5">Lat / Lng graticules</span>
-                        </div>
-                      </div>
-                      <input
-                        type="checkbox"
-                        checked={showGrid}
-                        onChange={(e) => setShowGrid(e.target.checked)}
-                        className="w-3.5 h-3.5 rounded border-slate-700 bg-slate-850 text-cyan-400 focus:ring-0 focus:ring-offset-0 accent-cyan-400 cursor-pointer"
-                      />
-                    </label>
-
-                    {/* 5. Pacific Trade Winds Toggle */}
-                    <label className="flex items-center justify-between p-2 rounded-xl bg-slate-900/50 border border-slate-850 hover:bg-slate-900/80 hover:border-slate-800 transition-all cursor-pointer">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm">💨</span>
-                        <div>
-                          <span className="text-[10px] font-semibold text-slate-200 block leading-tight">Pacific Trade Winds</span>
-                          <span className="text-[8px] text-slate-500 block leading-none mt-0.5">ENSO trade wind flows</span>
-                        </div>
-                      </div>
-                      <input
-                        type="checkbox"
-                        checked={showTradeWinds}
-                        onChange={(e) => setShowTradeWinds(e.target.checked)}
-                        className="w-3.5 h-3.5 rounded border-slate-700 bg-slate-850 text-cyan-400 focus:ring-0 focus:ring-offset-0 accent-cyan-400 cursor-pointer"
-                      />
-                    </label>
-                  </div>
-
-                  {/* SATELLITE BASE MAP STYLES */}
-                  <div className="space-y-1.5 pt-1.5 border-t border-slate-800/40">
-                    <span className="text-[9px] font-mono uppercase text-slate-500 font-bold tracking-widest block">World Map Style</span>
-                    <div className="grid grid-cols-5 gap-0.5 bg-slate-950 p-0.5 rounded-xl border border-slate-850">
-                      <button
-                        onClick={() => setBaseMapStyle("satellite")}
-                        className={`py-1.5 text-[8px] rounded-lg font-mono font-bold transition-all cursor-pointer ${
-                          baseMapStyle === "satellite"
-                            ? "bg-slate-800 text-cyan-400 shadow-inner"
-                            : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
-                        }`}
-                        title="NASA Satellite Imagery"
-                      >
-                        SAT
-                      </button>
-                      <button
-                        onClick={() => setBaseMapStyle("political")}
-                        className={`py-1.5 text-[8px] rounded-lg font-mono font-bold transition-all cursor-pointer ${
-                          baseMapStyle === "political"
-                            ? "bg-slate-800 text-cyan-400 shadow-inner"
-                            : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
-                        }`}
-                        title="Political Country Borders Map"
-                      >
-                        BDR
-                      </button>
-                      <button
-                        onClick={() => setBaseMapStyle("realistic")}
-                        className={`py-1.5 text-[8px] rounded-lg font-mono font-bold transition-all cursor-pointer ${
-                          baseMapStyle === "realistic"
-                            ? "bg-slate-800 text-cyan-400 shadow-inner"
-                            : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
-                        }`}
-                        title="Moody Classic Theme"
-                      >
-                        DK
-                      </button>
-                      <button
-                        onClick={() => setBaseMapStyle("enhanced")}
-                        className={`py-1.5 text-[8px] rounded-lg font-mono font-bold transition-all cursor-pointer ${
-                          baseMapStyle === "enhanced"
-                            ? "bg-slate-800 text-cyan-400 shadow-inner"
-                            : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
-                        }`}
-                        title="Infrared Thermal SST Theme"
-                      >
-                        TH
-                      </button>
-                      <button
-                        onClick={() => setBaseMapStyle("blueprint")}
-                        className={`py-1.5 text-[8px] rounded-lg font-mono font-bold transition-all cursor-pointer ${
-                          baseMapStyle === "blueprint"
-                            ? "bg-slate-800 text-cyan-400 shadow-inner"
-                            : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
-                        }`}
-                        title="High-Tech Cyber Blueprint"
-                      >
-                        CY
-                      </button>
-                    </div>
-                    {/* Visual indicators for selected option name */}
-                    <div className="text-[8px] font-mono text-slate-400 flex justify-between items-center px-1">
-                      <span>Active Style:</span>
-                      <span className="text-cyan-400 uppercase font-bold">
-                        {baseMapStyle === "satellite" ? "NASA Satellite" :
-                         baseMapStyle === "political" ? "Political Borders" :
-                         baseMapStyle === "realistic" ? "Moody Classic" :
-                         baseMapStyle === "enhanced" ? "Thermal IR" : "Cyber Grid"}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="text-[8px] font-mono text-slate-500 leading-snug">
-                    🌊 Equatorial currents reverse automatically depending on the active year's El Niño/La Niña intensity.
-                  </div>
-
-                </div>
-              ) : (
-                <div className="text-[9px] text-slate-400 font-mono text-center py-1">
-                  Click arrow to view 3 overlays & map styles
-                </div>
-              )}
-            </div>
-
           </div>
 
           {/* DYNAMIC SCENE SCALE BAR COLOR LEGENDS */}
-          <div className="bg-[#030712] border border-slate-850 rounded-xl p-3 flex items-center justify-between font-mono text-[10px] text-slate-400">
+          <div className="bg-[#030712] border border-slate-800 rounded-xl p-3 flex items-center justify-between font-mono text-[10px] text-slate-400">
             {activeLayer === "impacts" ? (
               <>
                 <span className="flex items-center gap-1"><Info className="w-3.5 h-3.5 text-cyan-400" /> Legend colors link locations to the unique impact descriptions list.</span>
@@ -1109,6 +914,202 @@ export default function ClimateMap({
                 <span className="font-semibold text-orange-400">Drier Conditions</span>
                 <div className="h-2 flex-grow mx-4 rounded-full bg-gradient-to-r from-orange-600 via-slate-800 to-cyan-600 border border-slate-900" />
                 <span className="font-semibold text-cyan-400">Wetter Conditions</span>
+              </div>
+            )}
+          </div>
+
+          {/* DEDICATED GEOSPATIAL CONTROL DASHBOARD (BELOW MAP) */}
+          <div id="geospatial-layer-controller" className="bg-[#030712] border border-slate-800 p-4 rounded-2xl shadow-lg select-none text-slate-200 transition-all duration-300">
+            <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-800/80">
+              <div className="flex items-center gap-2">
+                <span className="p-1.5 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                  <Layers className="w-3.5 h-3.5" />
+                </span>
+                <div>
+                  <span className="font-bold text-slate-100 text-xs uppercase tracking-wider block">Geospatial Controls</span>
+                  <span className="text-[10px] font-mono text-slate-500">Contextual overlays &amp; base map styling</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-[10px] font-mono text-cyan-400 uppercase font-bold hidden sm:inline">
+                  {baseMapStyle === "satellite" ? "NASA Satellite" :
+                   baseMapStyle === "political" ? "Political Borders" :
+                   baseMapStyle === "realistic" ? "Moody Classic" :
+                   baseMapStyle === "enhanced" ? "Thermal IR" : "Cyber Grid"}
+                </span>
+                <button 
+                  onClick={() => setIsControlsExpanded(!isControlsExpanded)}
+                  className="px-2 py-1 rounded-lg bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition-colors cursor-pointer text-[10px] font-mono"
+                  title={isControlsExpanded ? "Collapse Controls" : "Expand Controls"}
+                >
+                  {isControlsExpanded ? "▲ Hide" : "▼ Show"}
+                </button>
+              </div>
+            </div>
+
+            {isControlsExpanded ? (
+              <div className="space-y-4">
+                {/* CONTEXTUAL LAYER TOGGLES */}
+                <div className="space-y-2">
+                  <span className="text-[9px] font-mono uppercase text-slate-500 font-bold tracking-widest block">Contextual Overlays</span>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+                    {/* 1. Ocean Currents Toggle */}
+                    <label className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-900/50 border border-slate-800/80 hover:bg-slate-900 hover:border-slate-700 transition-all cursor-pointer">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="text-sm shrink-0">🌊</span>
+                        <div className="min-w-0">
+                          <span className="text-[10px] font-semibold text-slate-200 block leading-tight truncate">Ocean Currents</span>
+                          <span className="text-[8px] text-slate-500 block leading-none mt-0.5 truncate">Equatorial flows</span>
+                        </div>
+                      </div>
+                      <input
+                        type="checkbox"
+                        checked={showOceanCurrents}
+                        onChange={(e) => setShowOceanCurrents(e.target.checked)}
+                        className="w-3.5 h-3.5 rounded border-slate-700 bg-slate-800 text-cyan-400 focus:ring-0 focus:ring-offset-0 accent-cyan-400 cursor-pointer shrink-0"
+                      />
+                    </label>
+
+                    {/* 2. Atmospheric Pressure Toggle */}
+                    <label className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-900/50 border border-slate-800/80 hover:bg-slate-900 hover:border-slate-700 transition-all cursor-pointer">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="text-sm shrink-0">🌀</span>
+                        <div className="min-w-0">
+                          <span className="text-[10px] font-semibold text-slate-200 block leading-tight truncate">Walker (H/L)</span>
+                          <span className="text-[8px] text-slate-500 block leading-none mt-0.5 truncate">Pacific isobars</span>
+                        </div>
+                      </div>
+                      <input
+                        type="checkbox"
+                        checked={showAtmosphericPressure}
+                        onChange={(e) => setShowAtmosphericPressure(e.target.checked)}
+                        className="w-3.5 h-3.5 rounded border-slate-700 bg-slate-800 text-cyan-400 focus:ring-0 focus:ring-offset-0 accent-cyan-400 cursor-pointer shrink-0"
+                      />
+                    </label>
+
+                    {/* 3. Cloud Cover Toggle */}
+                    <label className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-900/50 border border-slate-800/80 hover:bg-slate-900 hover:border-slate-700 transition-all cursor-pointer">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="text-sm shrink-0">☁️</span>
+                        <div className="min-w-0">
+                          <span className="text-[10px] font-semibold text-slate-200 block leading-tight truncate">Clouds</span>
+                          <span className="text-[8px] text-slate-500 block leading-none mt-0.5 truncate">Tropical drift</span>
+                        </div>
+                      </div>
+                      <input
+                        type="checkbox"
+                        checked={showCloudCover}
+                        onChange={(e) => setShowCloudCover(e.target.checked)}
+                        className="w-3.5 h-3.5 rounded border-slate-700 bg-slate-800 text-cyan-400 focus:ring-0 focus:ring-offset-0 accent-cyan-400 cursor-pointer shrink-0"
+                      />
+                    </label>
+
+                    {/* 4. Coordinate Grid Toggle */}
+                    <label className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-900/50 border border-slate-800/80 hover:bg-slate-900 hover:border-slate-700 transition-all cursor-pointer">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="text-sm shrink-0">🌐</span>
+                        <div className="min-w-0">
+                          <span className="text-[10px] font-semibold text-slate-200 block leading-tight truncate">Grid Lines</span>
+                          <span className="text-[8px] text-slate-500 block leading-none mt-0.5 truncate">Lat / Lng lines</span>
+                        </div>
+                      </div>
+                      <input
+                        type="checkbox"
+                        checked={showGrid}
+                        onChange={(e) => setShowGrid(e.target.checked)}
+                        className="w-3.5 h-3.5 rounded border-slate-700 bg-slate-800 text-cyan-400 focus:ring-0 focus:ring-offset-0 accent-cyan-400 cursor-pointer shrink-0"
+                      />
+                    </label>
+
+                    {/* 5. Pacific Trade Winds Toggle */}
+                    <label className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-900/50 border border-slate-800/80 hover:bg-slate-900 hover:border-slate-700 transition-all cursor-pointer">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="text-sm shrink-0">💨</span>
+                        <div className="min-w-0">
+                          <span className="text-[10px] font-semibold text-slate-200 block leading-tight truncate">Trade Winds</span>
+                          <span className="text-[8px] text-slate-500 block leading-none mt-0.5 truncate">ENSO wind flow</span>
+                        </div>
+                      </div>
+                      <input
+                        type="checkbox"
+                        checked={showTradeWinds}
+                        onChange={(e) => setShowTradeWinds(e.target.checked)}
+                        className="w-3.5 h-3.5 rounded border-slate-700 bg-slate-800 text-cyan-400 focus:ring-0 focus:ring-offset-0 accent-cyan-400 cursor-pointer shrink-0"
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                {/* SATELLITE BASE MAP STYLES */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-slate-800/60">
+                  <div className="space-y-1">
+                    <span className="text-[9px] font-mono uppercase text-slate-500 font-bold tracking-widest block">World Map Style</span>
+                    <span className="text-[9px] font-mono text-slate-500 block">
+                      🌊 Equatorial currents reverse automatically depending on the active year&apos;s El Niño/La Niña intensity.
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-5 gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 shrink-0 sm:w-80">
+                    <button
+                      onClick={() => setBaseMapStyle("satellite")}
+                      className={`py-1.5 px-2 text-[9px] rounded-lg font-mono font-bold transition-all cursor-pointer ${
+                        baseMapStyle === "satellite"
+                          ? "bg-slate-800 text-cyan-400 shadow-inner"
+                          : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
+                      }`}
+                      title="NASA Satellite Imagery"
+                    >
+                      SAT
+                    </button>
+                    <button
+                      onClick={() => setBaseMapStyle("political")}
+                      className={`py-1.5 px-2 text-[9px] rounded-lg font-mono font-bold transition-all cursor-pointer ${
+                        baseMapStyle === "political"
+                          ? "bg-slate-800 text-cyan-400 shadow-inner"
+                          : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
+                      }`}
+                      title="Political Country Borders Map"
+                    >
+                      BDR
+                    </button>
+                    <button
+                      onClick={() => setBaseMapStyle("realistic")}
+                      className={`py-1.5 px-2 text-[9px] rounded-lg font-mono font-bold transition-all cursor-pointer ${
+                        baseMapStyle === "realistic"
+                          ? "bg-slate-800 text-cyan-400 shadow-inner"
+                          : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
+                      }`}
+                      title="Moody Classic Theme"
+                    >
+                      DK
+                    </button>
+                    <button
+                      onClick={() => setBaseMapStyle("enhanced")}
+                      className={`py-1.5 px-2 text-[9px] rounded-lg font-mono font-bold transition-all cursor-pointer ${
+                        baseMapStyle === "enhanced"
+                          ? "bg-slate-800 text-cyan-400 shadow-inner"
+                          : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
+                      }`}
+                      title="Infrared Thermal SST Theme"
+                    >
+                      TH
+                    </button>
+                    <button
+                      onClick={() => setBaseMapStyle("blueprint")}
+                      className={`py-1.5 px-2 text-[9px] rounded-lg font-mono font-bold transition-all cursor-pointer ${
+                        baseMapStyle === "blueprint"
+                          ? "bg-slate-800 text-cyan-400 shadow-inner"
+                          : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
+                      }`}
+                      title="High-Tech Cyber Blueprint"
+                    >
+                      CY
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-[10px] text-slate-400 font-mono text-center py-1">
+                Click Show to configure contextual overlays &amp; world map styles
               </div>
             )}
           </div>
